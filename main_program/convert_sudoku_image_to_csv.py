@@ -100,18 +100,25 @@ def get_cells(sudoku_img:np.ndarray)->list:
         for cell in grid_contour:
             x, y, w, h = cv2.boundingRect(cell)
             # first find the centroid of the cell. (y, x) instead of (x, y) for sorting purposes
-            coordinates_of_centroid = (y + (h/2), x + (w/2))
-
+            # then normalize it to 9x9 (floor it to fit)
+            coordinates_of_centroid = (int(((y+(h/2))/sudoku_img_height)*9), 
+                                        int(((x+(w/2))/sudoku_img_width)*9))
+            print(coordinates_of_centroid, (y+ (h/2), x + (w/2)))          
             # get the image cropped via contour
-            image_of_cell = sudoku_img[y:y+h, x:x+w]
+            image_of_cell = sudoku_img[y+int(0.1*h):y+int(h*0.9), x+int(0.1*h):x+int(0.9*w)]
+            # image_of_cell = sudoku_img[y:y+h, x:x+w]
+
             list_of_coord_and_cell.append((*coordinates_of_centroid, image_of_cell))
 
+        
         # sort the list
         list_of_coord_and_cell.sort()
-
+        # for y_cord, x_cord, my_img in list_of_coord_and_cell:
+            # cv2.imshow(f"{x_cord}, {y_cord}", my_img) 
+            # cv2.waitKey(0)
         # remove the temporary coordinate of centroid used for sorting
         list_of_sorted_cells = list(map(lambda x: x[2], list_of_coord_and_cell))
-        print(list_of_sorted_cells)
+        # print(list_of_sorted_cells)
         # turn the list into a 2d list which contains 9 list of 9 elements and returns it
         return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
     else:
@@ -135,7 +142,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     # assume 9x9 grid. Can't bother to check...
 
     def str_to_int(text):
-        print(text)
+        # print(text)
         if text != '':
             return int(text)
         else:
@@ -146,10 +153,12 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     for y in range(9):
         for x in range(9):        
             # inverting the image back to white background
+            # cv2.imshow(f"{x}, {y}", grid_of_img[y][x])
+            # cv2.waitKey(0)       
             inverted_img = cv2.bitwise_not(grid_of_img[y][x])
-            cv2.imshow(f"(x = {x}, y = {y}",  inverted_img)
-            cv2.waitKey(0)
-            text = pytesseract.image_to_string(inverted_img, lang='eng')
+            text = pytesseract.image_to_string(inverted_img,
+             lang='eng',
+            config='--psm 10 -c tessedit_char_whitelist=0123456789')
             grid_of_num[y][x] = str_to_int(text)        
 
     return grid_of_num
@@ -163,5 +172,5 @@ if __name__ == "__main__":
     # list of cells as a 2d list
     list_of_cells = get_cells(sudoku_img)
     # print(list_of_cells)
-    print(image_to_num_grid(list_of_cells))
+    print(np.matrix(image_to_num_grid(list_of_cells)))
     cv2.destroyAllWindows()
