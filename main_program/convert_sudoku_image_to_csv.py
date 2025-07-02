@@ -1,7 +1,6 @@
 import cv2
 import pytesseract
-import sys
-import numpy
+import numpy as np
 
 def load_and_prepare_image(path_to_image:str)->np.ndarray:
     """
@@ -26,7 +25,7 @@ def load_and_prepare_image(path_to_image:str)->np.ndarray:
     return thresh
         
     
-def crop_image(uncropped_img):
+def crop_image(uncropped_img:np.ndarray)->np.ndarray:
     """
     Crops the image based on the surrouding, external bounding box
 
@@ -38,21 +37,131 @@ def crop_image(uncropped_img):
 
     surrounding_contour, _ = cv2.findContours(uncropped_img,
                                 cv2.RETR_EXTERNAL,# only return the external contour
-                                cv2.CHAIN_APPROX_SIMPLE) # probably some algorithm to find contour
-    # surrounding contour should only of length one
-    if len(surrounding_contour) == 1:
-        # gets the bounding rectangle of the surrounding borders
-        x, y, w, h = cv2.boundingRect(surrounding_contour)
+                                cv2.CHAIN_APPROX_SIMPLE) # probably some algorithm to find contours
+#     surrounding_contour = max(possible_surrounding_contour, key=cv2.contourArea)
+#     
+#     # Get the 4 corners
+#     epsilon = 0.02 * cv2.arcLength(surrounding_contour, True)
+#     approx = cv2.approxPolyDP(surrounding_contour, epsilon, True)
 
+    
+    # surrounding contour should only be of length one
+    # gets the bounding rectangle of the surrounding borders
+    if len(surrounding_contour) == 1: 
+        x, y, w, h = cv2.boundingRect(surrounding_contour[0])
+        
         # crop the image
         # this syntax just says, get the pixel from y until y + h, from x until x + w
-        cropped_image = img[y:y+h, x:x+h]
+        cropped_image = uncropped_img[y:y+h, x:x+h]
 
-        return cropped_image        
-        
+        return cropped_image
     else:
-        sys.exit("Please take another picture! The external borders aren't clear enough")
+        raise Exception("Please retake the picture. Can't find external borders. ")      
                 
 
-def get_cells(sudoku_img):
-    pass
+def get_cells(sudoku_img:np.ndarray)->list:
+    """
+    Given an image of a sudoku puzzle, this function will split the image into 81 images of its cells. 
+
+    sudoku_img (NumPy array for opencv images): an image of the sudoku puzzle
+
+    return: a 2d list representing the grid of a sudoku puzzle
+    """
+    contours, _ = cv2.findContours(sudoku_img,
+                                cv2.RETR_LIST, # returns list of all contours
+                                cv2.CHAIN_APPROX_SIMPLE)
+    sudoku_img_height, sudoku_img_width = sudoku_img.shape[:2]
+    image_area = sudoku_img_height * sudoku_img_width
+    
+    def filter_contours(contour_to_check):
+        contour_area = cv2.contourArea(contour_to_check)
+        
+        # a bit arbitrary but decide that contour isn't a grid if:
+        # - size is bigger than 0.9 of image size (filter out surrounding border contour)
+        is_surrounding_border = (contour_area > image_area*0.9) 
+        # - size is smaller than image_area/81 * 0.75 which is the theoretical size but add 0.75 error tolerance (to filter out numbers) or has aspect ratio that isn't "square enough"
+        is_too_small = (contour_area < (image_area/81)*0.75)
+
+        width, height = cv2.boundingRect(contour_to_check)[2:]
+        aspect_ratio = width/float(height)
+        
+        is_square_enough = (0.8 < aspect_ratio < 1.2)
+
+        return (not is_surrounding_border) and (not is_too_small) and (is_square_enough)
+        
+    grid_contour = list(filter(filter_contours, contours))
+
+    # after filtering contour, order the pictures into a 2d list representing a grid 
+    if len(grid_contour) == 81:
+        # check that there are 81 cells in the grids
+
+        # sort the list of grids
+        list_of_coord_and_cell = []
+        for cell in grid_contour:
+            x, y, w, h = cv2.boundingRect(cell)
+            # first find the centroid of the cell. (y, x) instead of (x, y) for sorting purposes
+            coordinates_of_centroid = (y + (h/2), x + (w/2))
+
+            # get the image cropped via contour
+            image_of_cell = sudoku_img[y:y+h, x:x+w]
+            list_of_coord_and_cell.append((*coordinates_of_centroid, image_of_cell))
+
+        # sort the list
+        list_of_coord_and_cell.sort()
+
+        # remove the temporary coordinate of centroid used for sorting
+        list_of_sorted_cells = list(map(lambda x: x[2], list_of_coord_and_cell))
+        print(list_of_sorted_cells)
+        # turn the list into a 2d list which contains 9 list of 9 elements and returns it
+        return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
+    else:
+        raise Exception("Please take another picture. Make sure the sudoku grid is square.")
+
+def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract") -> list:
+    """
+    Inputs a 2d, 9x9 list containing opencv images which represents a sudoku cell.
+
+    grid_of_img (list): a 2d list of opencv images (NumPy array)
+
+    path_to_pytesseract (str): a path to either pytesseract.exe or just pytesseract. Can be found using "find / -type d -name tessdata 2>/dev/null" for UNIX systems
+
+    For UNIX systems, make sure to export TESSDATA_PREFIX=/path/to/tessdata to ~/.bashrc
+    And download eng.traineddata into /path/to/tessdata/
+    From: https://github.com/tesseract-ocr/tessdata
+    
+    return: a 2d list of numbers (0 to 9)
+    """
+    pytesseract.pytesseract.tesseract_cmd = path_to_pytesseract
+    # assume 9x9 grid. Can't bother to check...
+
+    def str_to_int(text):
+        print(text)
+        if text != '':
+            return int(text)
+        else:
+            return 0
+    
+    grid_of_num = grid_of_img.copy()
+    
+    for y in range(9):
+        for x in range(9):        
+            # inverting the image back to white background
+            inverted_img = cv2.bitwise_not(grid_of_img[y][x])
+            cv2.imshow(f"(x = {x}, y = {y}",  inverted_img)
+            cv2.waitKey(0)
+            text = pytesseract.image_to_string(inverted_img, lang='eng')
+            grid_of_num[y][x] = str_to_int(text)        
+
+    return grid_of_num
+            
+    
+    
+    
+if __name__ == "__main__":
+    sudoku_img = load_and_prepare_image("./images/sudoku_not_cropped.png")
+    sudoku_img = crop_image(sudoku_img)    
+    # list of cells as a 2d list
+    list_of_cells = get_cells(sudoku_img)
+    # print(list_of_cells)
+    print(image_to_num_grid(list_of_cells))
+    cv2.destroyAllWindows()

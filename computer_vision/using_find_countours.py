@@ -2,11 +2,13 @@ import cv2 as cv
 import time
 
 img = cv.imread(
-    "./images/sudoku.png"
+    "./images/sudoku_check.png"
 )
 
 # graying the image
 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+# blurred = cv.GaussianBlur(gray, (11, 11), 0)
 
 # converting it to black and white (binary)
 thresh = cv.adaptiveThreshold(gray, 255,
