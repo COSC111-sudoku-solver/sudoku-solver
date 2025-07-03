@@ -103,24 +103,34 @@ def get_cells(sudoku_img:np.ndarray)->list:
             # then normalize it to 9x9 (floor it to fit)
             coordinates_of_centroid = (int(((y+(h/2))/sudoku_img_height)*9), 
                                         int(((x+(w/2))/sudoku_img_width)*9))
-            print(coordinates_of_centroid, (y+ (h/2), x + (w/2)))          
+            # print(coordinates_of_centroid, (y+ (h/2), x + (w/2)))
             # get the image cropped via contour
-            image_of_cell = sudoku_img[y+int(0.1*h):y+int(h*0.9), x+int(0.1*h):x+int(0.9*w)]
+            y1 = max(0, y + int(0.075 * h))
+            y2 = min(sudoku_img_height, y + int(0.925 * h))
+            x1 = max(0, x + int(0.075 * w))
+            x2 = min(sudoku_img_width, x + int(0.925 * w))
+            
+            image_of_cell = sudoku_img[y1:y2, x1:x2]
+            
+            
             # image_of_cell = sudoku_img[y:y+h, x:x+w]
-
+            
             list_of_coord_and_cell.append((*coordinates_of_centroid, image_of_cell))
 
         
         # sort the list
         list_of_coord_and_cell.sort()
+        print(len(list_of_coord_and_cell))
         # for y_cord, x_cord, my_img in list_of_coord_and_cell:
             # cv2.imshow(f"{x_cord}, {y_cord}", my_img) 
             # cv2.waitKey(0)
         # remove the temporary coordinate of centroid used for sorting
-        list_of_sorted_cells = list(map(lambda x: x[2], list_of_coord_and_cell))
-        # print(list_of_sorted_cells)
-        # turn the list into a 2d list which contains 9 list of 9 elements and returns it
-        return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
+        list_of_sorted_cells = [cell[2] for cell in list_of_coord_and_cell]
+        print(list_of_sorted_cells)
+        # turn the list into a 2d list which contains 9 list of 9 elements and zreturns it
+        # return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
+        return [list_of_sorted_cells[i * 9:(i + 1) * 9] for i in range(9)]
+        
     else:
         raise Exception("Please take another picture. Make sure the sudoku grid is square.")
 
@@ -159,7 +169,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             text = pytesseract.image_to_string(inverted_img,
              lang='eng',
             config='--psm 10 -c tessedit_char_whitelist=0123456789')
-            grid_of_num[y][x] = str_to_int(text)        
+            grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
             
@@ -167,10 +177,10 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     
     
 if __name__ == "__main__":
-    sudoku_img = load_and_prepare_image("./images/sudoku_not_cropped.png")
+    sudoku_img = load_and_prepare_image("./images/sudoku_faint_borders.png")
     sudoku_img = crop_image(sudoku_img)    
     # list of cells as a 2d list
     list_of_cells = get_cells(sudoku_img)
     # print(list_of_cells)
-    print(np.matrix(image_to_num_grid(list_of_cells)))
+    print(np.matrix(image_to_num_grid(list_of_cells, "/usr/bin/tesseract")))
     cv2.destroyAllWindows()
