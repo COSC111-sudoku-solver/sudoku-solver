@@ -120,13 +120,13 @@ def get_cells(sudoku_img:np.ndarray)->list:
         
         # sort the list
         list_of_coord_and_cell.sort()
-        print(len(list_of_coord_and_cell))
+        # print(len(list_of_coord_and_cell))
         # for y_cord, x_cord, my_img in list_of_coord_and_cell:
             # cv2.imshow(f"{x_cord}, {y_cord}", my_img) 
             # cv2.waitKey(0)
         # remove the temporary coordinate of centroid used for sorting
         list_of_sorted_cells = [cell[2] for cell in list_of_coord_and_cell]
-        print(list_of_sorted_cells)
+        # print(list_of_sorted_cells)
         # turn the list into a 2d list which contains 9 list of 9 elements and zreturns it
         # return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
         return [list_of_sorted_cells[i * 9:(i + 1) * 9] for i in range(9)]
@@ -172,15 +172,25 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
-            
+
+def print_sudoku_table(grid_of_num:list):
+    """
+    grid_of_num (list): 2d list, a list of 9 list of 9 elements representing a sudoku table
+
+    
+    """            
     
     
     
 if __name__ == "__main__":
+    print("Loading image...")
     sudoku_img = load_and_prepare_image("./images/sudoku_faint_borders.png")
+    print("Cropping image...")
     sudoku_img = crop_image(sudoku_img)    
+    print("Splitting cells...")
     # list of cells as a 2d list
     list_of_cells = get_cells(sudoku_img)
+    print("Using OCR...")
     # print(list_of_cells)
     print(np.matrix(image_to_num_grid(list_of_cells, "/usr/bin/tesseract")))
     cv2.destroyAllWindows()
