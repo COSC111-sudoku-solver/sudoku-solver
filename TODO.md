@@ -20,6 +20,7 @@
 - [websudoku](https://www.websudoku.com/?level=2)
 - [printable sudoku](https://sudoku.com/sudoku-printable)
 - [sudoku web](https://www.sudokuweb.org/)
+- [nytimes sodoku](https://www.nytimes.com/puzzles/sudoku/hard)
 
 - Best size: ![](./main_program/images/best_size.png)
 

@@ -172,14 +172,6 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
-
-def print_sudoku_table(grid_of_num:list):
-    """
-    grid_of_num (list): 2d list, a list of 9 list of 9 elements representing a sudoku table
-
-    
-    """            
-    
     
     
 if __name__ == "__main__":
