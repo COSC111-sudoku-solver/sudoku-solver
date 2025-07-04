@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import copy
+import sudoku_utils
 
 def read_sudoku_csv(file_path:str)->list:
     """
@@ -107,7 +108,7 @@ def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
                 # i kinda hate 'continue' and 'break' but no thanks to nesting hell...
                 continue
             for n in range(1, 10):
-                # try to continue with k as the solution
+                # try to continue with n as the solution
                 if not is_possible(sudoku_puzzle, x, y, n):
                     continue 
                 sudoku_puzzle[y][x] = n
@@ -122,6 +123,7 @@ def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
             # so gotta return...
             return
     solutions_list.append(copy.deepcopy(sudoku_puzzle))
+
 
 
 if __name__ == "__main__":

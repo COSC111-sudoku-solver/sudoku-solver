@@ -166,18 +166,21 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             # inverting the image back to white background
             # cv2.imshow(f"{x}, {y}", grid_of_img[y][x])
             # cv2.waitKey(0)       
-            inverted_img = cv2.bitwise_not(grid_of_img[y][x])
-            text = pytesseract.image_to_string(inverted_img,
-             lang='eng',
-            config='--psm 10 -c tessedit_char_whitelist=123456789')
-            grid_of_num[y][x] = str_to_int(text.strip())        
+            if cv2.countNonZero(img:=grid_of_img[y][x]) == 0:
+                grid_of_img[y][x] = 0
+            else:
+                inverted_img = cv2.bitwise_not(img)
+                text = pytesseract.image_to_string(inverted_img,
+                lang='eng',
+                config='--psm 10 -c tessedit_char_whitelist=123456789')
+                grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
     
     
 if __name__ == "__main__":
     print("Loading image...")
-    sudoku_img = load_and_prepare_image("./images/sudoku_nyc.png")
+    sudoku_img = load_and_prepare_image("./images/sudoku_faint_borders.png")
     print("Cropping image...")
     sudoku_img = crop_image(sudoku_img)    
     print("Splitting cells...")
