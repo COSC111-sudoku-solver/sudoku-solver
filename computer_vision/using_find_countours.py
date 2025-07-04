@@ -2,7 +2,7 @@ import cv2 as cv
 import time
 
 img = cv.imread(
-    "./images/sudoku_check.png"
+    "./images/sudoku.png"
 )
 
 # graying the image
@@ -20,20 +20,27 @@ thresh = cv.adaptiveThreshold(gray, 255,
 # finding the contours
 contours, hierarchy  = cv.findContours(thresh,
                         cv.RETR_TREE,
-                        cv.CHAIN_APPROX_SIMPLE)
+                        cv.CHAIN_APPROX_NONE)
 
 filtered_contours = []
 surrounding_contour = max(contours, key=cv.contourArea)
 for contour in contours:
     # filter out all the numbers 
+
     area = cv.contourArea(contour)
     if area < 1000 or (cv.contourArea(surrounding_contour) == area):
         continue
+
     x, y, w, h = cv.boundingRect(contour)
     aspect_ratio = w/float(h)
-
     if 0.8 < aspect_ratio < 1.2:
         filtered_contours.append(contour)
+
+    cv.drawContours(img, contour, -1, (0, 255, 0), 3)
+    cv.imshow("frame", img)
+
+    if cv.waitKey(0) == ord('n'):
+        continue
 
 print(len(filtered_contours))
 

@@ -177,7 +177,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     
 if __name__ == "__main__":
     print("Loading image...")
-    sudoku_img = load_and_prepare_image("./images/sudoku.png")
+    sudoku_img = load_and_prepare_image("./images/sudoku_nyc.png")
     print("Cropping image...")
     sudoku_img = crop_image(sudoku_img)    
     print("Splitting cells...")

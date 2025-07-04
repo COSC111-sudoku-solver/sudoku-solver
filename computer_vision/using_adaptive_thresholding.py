@@ -1,6 +1,6 @@
 import cv2 as cv
 
-img = cv.imread("./images/sudoku.png", cv.IMREAD_GRAYSCALE)
+img = cv.imread("./images/sudoku_nyc.png", cv.IMREAD_GRAYSCALE)
 
 # Apply adaptive thresholding
 # I guess to make sure all the grids are of the same brightness?
