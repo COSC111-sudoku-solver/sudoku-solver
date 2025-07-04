@@ -2,6 +2,9 @@ import csv
 import numpy as np
 import copy
 import sudoku_utils
+import time
+import os
+import threading
 
 def read_sudoku_csv(file_path:str)->list:
     """
@@ -50,48 +53,7 @@ def is_possible(sudoku_puzzle:list, x:int, y:int, n:int)->bool:
     
     return fits_rows and fits_columns and fits_squares
 
-# def solve_sudoku(sudoku_puzzle:list, x:int=0, y:int=0) -> bool:
-#     """
-#     sudoku_puzzle (list): passing a pointer to a list that's outside the scope of the function. This program will search left to right, top to down.
-# 
-#     x (int): the x coordinates
-# 
-#     y (int): the y coordinates
-# 
-#     return: a bool representing whether the path is value or invalid
-#     """
-# 
-#     if y == 9:
-#         # if this program has reached the end. 
-#         # since the scope of x and y is from 0 to 8, if it reaches 9, then we're done
-#         return True
-#     # what a nesting mess...
-#     elif x == 9:
-#         # if we've reached the end of the row, drop down by one
-#         return solve_sudoku(sudoku_puzzle, 0, y+1)
-#     elif sudoku_puzzle[y][x] != 0:
-#         # now if we're our isn't actually replacable, then go on to the next
-#         return solve_sudoku(sudoku_puzzle, x+1, y)
-#     else:
-#         # now if our x, y coordinates have a 0, try to replace it from 1 to 9
-#         for k in range(1, 10):
-#             if is_possible(sudoku_puzzle, x, y, k):
-#                 # if k is possible replace the value at that coordinates with k
-#                 sudoku_puzzle[y][x] = k
-#                 # now see if we can actually try solve it given that our value of k is of such.
-# 
-#                 # move on and assume that our k is valid
-#                 if solve_sudoku(sudoku_puzzle, x+1, y):
-#                     return True
-#                 else:
-#                     # if the puzzle isn't solved yet, backtrack and try to replace k again
-#                     
-#                     sudoku_puzzle[y][x] = 0
-#         # if we've looped through, we know we didn't return True
-#         return False
-
-
-def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
+def solve_sudoku(sudoku_puzzle:list, solutions_list:list, delay:float=0) -> None:
     """
     solves the sudoku puzzle and returns the list of all possible solutions
 
@@ -112,7 +74,8 @@ def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
                 if not is_possible(sudoku_puzzle, x, y, n):
                     continue 
                 sudoku_puzzle[y][x] = n
-                solve_sudoku(sudoku_puzzle, solutions_list)
+                time.sleep(delay)
+                solve_sudoku(sudoku_puzzle, solutions_list, delay)
                 # but now we've traveled crossed dimensions and came back here
                 # but now we know... and so, backtracking...
                 sudoku_puzzle[y][x] = 0
@@ -126,19 +89,76 @@ def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
 
 
 
+def solve_sudoku_single_solution(sudoku_puzzle:list, x:int=0, y:int=0, delay:float=0) -> bool:
+    """
+    sudoku_puzzle (list): passing a pointer to a list that's outside the scope of the function. This program will search left to right, top to down.
+
+    x (int): the x coordinates
+
+    y (int): the y coordinates
+
+    return: a bool representing whether the path is value or invalid
+    """
+
+    if y == 9:
+        # if this program has reached the end. 
+        # since the scope of x and y is from 0 to 8, if it reaches 9, then we're done
+        return True
+    # what a nesting mess...
+    elif x == 9:
+        # if we've reached the end of the row, drop down by one
+        return solve_sudoku_single_solution(sudoku_puzzle, 0, y+1, delay)
+    elif sudoku_puzzle[y][x] != 0:
+        # now if we're our isn't actually replacable, then go on to the next
+        return solve_sudoku_single_solution(sudoku_puzzle, x+1, y, delay)
+    else:
+        # now if our x, y coordinates have a 0, try to replace it from 1 to 9
+        for k in range(1, 10):
+            if is_possible(sudoku_puzzle, x, y, k):
+                # if k is possible replace the value at that coordinates with k
+                sudoku_puzzle[y][x] = k
+                time.sleep(delay)
+                # now see if we can actually try solve it given that our value of k is of such.
+
+                # move on and assume that our k is valid
+                if solve_sudoku_single_solution(sudoku_puzzle, x+1, y, delay):
+                    return True
+                else:
+                    # if the puzzle isn't solved yet, backtrack and try to replace k again
+                    
+                    sudoku_puzzle[y][x] = 0
+        # if we've looped through, we know we didn't return True
+        return False
+
+
+def solve_sudoku_animated(sudoku_puzzle:list, delay:float=1/60) -> None:
+    """
+    Wrapper function.
+    """
+
+    def print_board_occasionally(sudoku_puzzle:list, delay:float):
+        while True:
+            time.sleep(delay)
+            os.system("clear")
+            sudoku_utils.print_board(sudoku_puzzle)
+    printing_thread = threading.Thread(target=print_board_occasionally, args=(sudoku_puzzle, delay), daemon=True)
+    printing_thread.start()
+    solve_sudoku_single_solution(sudoku_puzzle, delay=delay/10)
+    
+
 if __name__ == "__main__":
     puzzle = read_sudoku_csv("./sudoku_puzzle.csv")
     
     # want to duplicate it such that we have one puzzle, and one solution.
     solved_sudoku = copy.deepcopy(puzzle)
 
-    solved_sudoku = []
-    solve_sudoku(puzzle, solved_sudoku)    
+    solve_sudoku_animated(solved_sudoku)    
 
-    print("Puzzle: ")
-    print(np.matrix(puzzle))
+    time.sleep(1)
+    sudoku_utils.print_board(solved_sudoku)
+    # print("Puzzle: ")
+    # print(np.matrix(puzzle))
 
-    print("Solution: ")
-    print([np.matrix(sol) for sol in solved_sudoku])
-    
+    # print("Solution: ")
+    # print([np.matrix(sol) for sol in solved_sudoku])
     

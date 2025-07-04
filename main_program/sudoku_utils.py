@@ -9,10 +9,10 @@ def print_board(sudoku_grid:list) -> None:
 
     col_index = "  " + reduce(lambda a, b: a + b, [f"\033[0;{31+(i%5)}m{i}   " for i in range(9)]) + "\n"
 
-    top = "\033[0;32m╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗\033[0m\n"
-    middle_normal = "\033[0;32m┣━━━┿━━━┿━━━╫━━━┿━━━┿━━━╫━━━┿━━━┿━━━┫\033[0m\n"
-    middle_bold = "\033[0;32m╠═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╣\033[0m\n"
-    bottom = "\033[0;32m╚═══╩═══╩═══╩═══╩═══╩═══╩═══╩═══╩═══╝\033[0m\n"
+    top = "\033[0;31m╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗\033[0m\n"
+    middle_normal = "\033[0;31m╟\033[0;32m━━━┿━━━┿━━━\033[0;31m╫\033[0;32m━━━┿━━━┿━━━\033[0;31m╫\033[0;32m━━━┿━━━┿━━━\033[0;31m╢\033[0m\n"
+    middle_bold = "\033[0;31m╠═══╪═══╪═══╫═══╪═══╪═══╫═══╪═══╪═══╣\033[0m\n"
+    bottom = "\033[0;31m╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝\033[0m\n"
 
     # i sure do hope these are only pointers... otherwise rip memory (altho modern computers OP)
     x_grid_list = [
@@ -28,7 +28,7 @@ def print_board(sudoku_grid:list) -> None:
     ]
     grid = col_index + top
     for i, rows in enumerate(sudoku_grid):
-        grid += "\033[0;32m║ {} ┃ {} ┃ {} ║ {} ┃ {} ┃ {} ║ {} ┃ {} ┃ {} ║\033[0m \033[0;{}m{}\n".format(*[f"\033[0m{cell}\033[0;32m" for cell in rows], 31+(i%5), i) + x_grid_list[i]
+        grid += "\033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0m \033[0;{}m{}\n".format(*[f"\033[0m{cell}\033[0;32m" for cell in rows], 31+(i%5), i) + x_grid_list[i]
     print(grid)
     
 
