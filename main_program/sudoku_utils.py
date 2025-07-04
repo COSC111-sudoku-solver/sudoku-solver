@@ -43,7 +43,19 @@ def print_board(sudoku_grid:list) -> None:
 # ┏━┳━┳━╥━┳━┳━╥━┳━┳━┓
 #    """
 
+def double_check(sudoku_grid:list):
+    """
+    asks the user to enter a command.
+    command list:
+    - help: print the command list, give more info
+    - ok: exit out of the function
+    - replace x y n: replace the number in that given cell
+    """
 
+    user_input = input("is this correct? ")
+    user_input == "replace x y n".split()
+    grid[y][x] = n
+    print(sudoku_grid)
 if __name__ == "__main__":
     grid = [[5, 3, 4, 6, 7, 8, 1, 9, 2],
             [6, 7, 2, 1, 9, 5, 4, 3, 8],

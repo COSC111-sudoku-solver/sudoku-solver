@@ -1,6 +1,7 @@
 import cv2
 import pytesseract
 import numpy as np
+import sudoku_utils
 
 def load_and_prepare_image(path_to_image:str)->np.ndarray:
     """
@@ -168,7 +169,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             inverted_img = cv2.bitwise_not(grid_of_img[y][x])
             text = pytesseract.image_to_string(inverted_img,
              lang='eng',
-            config='--psm 10 -c tessedit_char_whitelist=0123456789')
+            config='--psm 10 -c tessedit_char_whitelist=123456789')
             grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
@@ -176,7 +177,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     
 if __name__ == "__main__":
     print("Loading image...")
-    sudoku_img = load_and_prepare_image("./images/sudoku_faint_borders.png")
+    sudoku_img = load_and_prepare_image("./images/sudoku.png")
     print("Cropping image...")
     sudoku_img = crop_image(sudoku_img)    
     print("Splitting cells...")
@@ -184,5 +185,5 @@ if __name__ == "__main__":
     list_of_cells = get_cells(sudoku_img)
     print("Using OCR...")
     # print(list_of_cells)
-    print(np.matrix(image_to_num_grid(list_of_cells, "/usr/bin/tesseract")))
+    print(sudoku_utils.print_board(image_to_num_grid(list_of_cells, "/usr/bin/tesseract")))
     cv2.destroyAllWindows()
