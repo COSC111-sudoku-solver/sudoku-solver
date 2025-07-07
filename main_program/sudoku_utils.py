@@ -1,4 +1,34 @@
 from functools import reduce
+
+# Track edited (user-modified) cells
+# edited_cells: Keeps track of (y, x) coordinates of any cells you replace.
+"""
+It's used to track which cells the user has modified by using the replace x y n command in your Sudoku game.
+Because you want the numbers that the user replaces to show up in blue — so 
+we need a way to remember which cells were changed.
+
+"""
+edited_cells = set()
+
+# Color a text in blue for display
+def make_text_blue(text):
+    return f"\033[0;34m{text}\033[0m"
+
+# Replace text with blue version if it's edited
+def apply_blue_to_edited(sudoku_grid):
+    # updated= [] initializes an empty list that will store the processed Sudoku rows.
+    updated = []
+    for y, row in enumerate(sudoku_grid):
+        #Loops over each row (row) of the Sudoku grid, and y is the row index (0-based).
+        updated_row = []
+        for x, val in enumerate(row):
+            if (y, x) in edited_cells:
+                updated_row.append(make_text_blue(' ' if val == 0 else val))
+            else:
+                updated_row.append(' ' if val == 0 else val)
+        updated.append(updated_row)
+    return updated
+
 def print_board(sudoku_grid:list) -> None:
     """
     Simply prints the board with a given a sudoku grid.
@@ -28,9 +58,13 @@ def print_board(sudoku_grid:list) -> None:
     ]
     grid = col_index + top
     for i, rows in enumerate(sudoku_grid):
-        grid += "\033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0m \033[0;{}m{}\n".format(*[f"\033[0m{cell}\033[0;32m" for cell in rows], 31+(i%5), i) + x_grid_list[i]
+        grid += "\033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0m \033[0;{}m{}\n".format(
+        *[f"\033[0m{' ' if cell == 0 else (make_text_blue(cell) if (i, j) in edited_cells else cell)}\033[0;32m" for j, cell in enumerate(rows)],
+        31+(i%5), i) + x_grid_list[i]
+
     print(grid)
-    
+
+
 
 #    f"""
 # ┏━┳━┳━╥━┳━┳━╥━┳━┳━┓
@@ -78,30 +112,34 @@ def double_check(sudoku_grid:list):
     - replace x y n: replace the number in that given cell
     """    
     while True:
-        print_board(grid) 
+        print_board(grid)  # your own colorful function
         print('Please recheck your sudoku board:')
-        print('-help')
-        print('-ok')
-        print('-replace <x> <y> <n>')
+        print('- help')
+        print('- ok')
+        print('- replace <x> <y> <n>')
         user_input = input("input a command: ").strip().lower()
 
         if user_input == "ok":
             print("✅ Final board accepted.")
             break
+
         elif user_input == "help":
             show_help()
+
         elif user_input.startswith("replace"):
             try:
                 parts = user_input.split()
-                x, y, n = map(int, parts[1:])
-                if 0 <= x < 9 and 0 <= y < 9 and 0 <= n <= 9:
-                    grid[y][x] = n  # update value
+                x, y, n = map(int, parts[1:]) # Convert to integers
+                if 0 <= x < 9 and 0 <= y < 9 and 0 <= n <= 9: 
+                    sudoku_grid[y][x] = n  # update value
+                    edited_cells.add((y, x))  # track edited cells
                 else:
-                    print("Invalid values")
+                    print("❌ Invalid values: x/y must be 0-8, n must be 0-9")
             except:
-                print("Format: replace x y n")
+                print("❌ Format: replace x y n")
+
         else:
-            print("Unknown command")
+            print("❌ Unknown command. Type 'help'")
 
 
         # user_input == "replace x y n".split()
