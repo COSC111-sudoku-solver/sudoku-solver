@@ -42,6 +42,32 @@ def print_board(sudoku_grid:list) -> None:
 # ╚═╩═╩═╩═╩═╩═╩═╩═╩═╝
 # ┏━┳━┳━╥━┳━┳━╥━┳━┳━┓
 #    """
+def show_help():
+    help_text = """
+📘 SUDOKU GAME HELP
+
+🔢 WHAT IS SUDOKU?
+Sudoku is a logic-based number puzzle. The game board is a 9x9 grid divided into nine 3x3 boxes.
+
+🎯 GOAL:
+Fill the grid so that:
+- Each ROW contains numbers 1 to 9 with no repeats.
+- Each COLUMN contains numbers 1 to 9 with no repeats.
+- Each 3x3 BOX contains numbers 1 to 9 with no repeats.
+
+🕹️ HOW TO PLAY:
+- Use logic to figure out where each number goes.
+- You can’t repeat numbers in any row, column, or box.
+- Start with the given clues and build from there.
+
+💡 TIPS:
+- Look for rows, columns, or boxes that are almost full.
+- Use process of elimination.
+- No guessing — it's all about logic.
+
+Type 'help' to see this message again.
+"""
+    print(help_text)
 
 def double_check(sudoku_grid:list):
     """
@@ -50,12 +76,37 @@ def double_check(sudoku_grid:list):
     - help: print the command list, give more info
     - ok: exit out of the function
     - replace x y n: replace the number in that given cell
-    """
+    """    
+    while True:
+        print_board(grid) 
+        print('Please recheck your sudoku board:')
+        print('-help')
+        print('-ok')
+        print('-replace <x> <y> <n>')
+        user_input = input("input a command: ").strip().lower()
 
-    user_input = input("is this correct? ")
-    user_input == "replace x y n".split()
-    grid[y][x] = n
-    print(sudoku_grid)
+        if user_input == "ok":
+            print("✅ Final board accepted.")
+            break
+        elif user_input == "help":
+            show_help()
+        elif user_input.startswith("replace"):
+            try:
+                parts = user_input.split()
+                x, y, n = map(int, parts[1:])
+                if 0 <= x < 9 and 0 <= y < 9 and 0 <= n <= 9:
+                    grid[y][x] = n  # update value
+                else:
+                    print("Invalid values")
+            except:
+                print("Format: replace x y n")
+        else:
+            print("Unknown command")
+
+
+        # user_input == "replace x y n".split()
+        # grid[y][x] = n
+        # print(sudoku_grid)
 if __name__ == "__main__":
     grid = [[5, 3, 4, 6, 7, 8, 1, 9, 2],
             [6, 7, 2, 1, 9, 5, 4, 3, 8],
@@ -66,4 +117,4 @@ if __name__ == "__main__":
             [9, 6, 1, 5, 3, 7, 2, 8, 4],
             [2, 8, 7, 4, 1, 9, 3, 6, 5],
             [3, 4, 5, 2, 8, 6, 7, 1, 9]]
-    print_board(grid)
+    double_check(grid)
