@@ -28,7 +28,7 @@ ANSI_CODE = {
 }
 
 
-def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["RED"], grid_color:str=ANSI_CODE["CYAN"]) -> None:
+def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["PURPLE"], grid_color:str=ANSI_CODE["LIGHT_BLUE"]) -> None:
     """
     Simply prints the board with a given a sudoku grid.
 
@@ -57,7 +57,7 @@ def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["RED"], grid_color:
     ]
     grid = col_index + top
     for i, rows in enumerate(sudoku_grid):
-        grid += (f"{border_color}║{grid_color}"+(" {} "+f"{grid_color}┃\033[0m" + " {} " + f"{grid_color}┃\033[0m"+" {} " + f"{border_color}║{grid_color}")*3 + "\033[0;{}m{}\n").format(
+        grid += (f"{border_color}║{grid_color}"+("\033[0m {} "+ f"{grid_color}┃\033[0m" + " {} " + f"{grid_color}┃\033[0m"+" {} " + f"{border_color}║{grid_color}")*3 + "\033[0;{}m{}\n").format(
         *rows,
         31+(i%5), i) + x_grid_list[i]
 
@@ -148,9 +148,13 @@ def double_check(sudoku_grid:list) -> None:
 
 # Track edited (user-modified) cells
 
-# Replace text with blue version if it's edited
-def format_grid(sudoku_grid, edited_cells:set):
+def format_grid(sudoku_grid:list, highlighted_cells:set):
     """
+    replaces the 2d grid from integers to string, with coloring and removing 0s
+
+    sudoku_grid (list): 2d list of integer representing a sudoku grid
+
+    edited_cells (set): a list of cells that should be highlighted
     It's used to track which cells the user has modified by using the replace x y n command in your Sudoku game.
     Because you want the numbers that the user replaces to show up in blue — so 
     we need a way to remember which cells were changed.
@@ -163,10 +167,10 @@ def format_grid(sudoku_grid, edited_cells:set):
         #Loops over each row (row) of the Sudoku grid, and y is the row index (0-based).
         updated_row = []
         for x, val in enumerate(row):
-            if (y, x) in edited_cells:
-                updated_row.append(color_text(' ' if val == 0 else val))
+            if (y, x) in highlighted_cells:
+                updated_row.append(color_text(' ' if val == 0 else val, ANSI_CODE["LIGHT_GREEN"]))
             else:
-                updated_row.append(color_text(' ' if val == 0 else val, ANSI_CODE["GREEN"]))
+                updated_row.append(color_text(' ' if val == 0 else val, ANSI_CODE["YELLOW"]))
         updated.append(updated_row)
     return updated
 
@@ -186,4 +190,3 @@ if __name__ == "__main__":
             [2, 8, 7, 4, 1, 9, 3, 6, 5],
             [3, 4, 5, 2, 8, 6, 7, 1, 9]]
     double_check(grid)
-    print_board(format_grid(grid, {(3, 2)}))

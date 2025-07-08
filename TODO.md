@@ -1,12 +1,12 @@
 # TODO
 
-- [] Converting image of sudoku to CSV file
-- [] Fully understand backtracking algorithm, implement my own version with the
-  generation of other solutions (if possible)
-- [] Coloring Text in terminal
-- [] Creating an animation
-- [] printing a nice grid
-- [] adding a correction interface in case it got it wrong
+- [x] Converting image of sudoku to CSV file
+- [x] Fully understand backtracking algorithm, implement my own version with the
+      generation of other solutions (if possible)
+- [x] Coloring Text in terminal
+- [x] Creating an animation
+- [x] printing a nice grid
+- [x] adding a correction interface in case it got it wrong
 
 # Useful Links
 
