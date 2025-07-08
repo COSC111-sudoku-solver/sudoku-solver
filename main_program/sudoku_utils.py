@@ -1,4 +1,5 @@
 from functools import reduce
+import csv
 
 ANSI_CODE = {
     "BLACK" : "\033[0;30m",
@@ -27,6 +28,38 @@ ANSI_CODE = {
     "END" : "\033[0m"
 }
 
+
+def read_sudoku_csv(file_path:str)->list:
+    """
+    reads a sudoku puzzle stored as a CSV file
+
+    file_path (str): path to the csv file
+
+    return: 2d list representing a sudoku grid
+    """
+    sudoku_puzzle = []
+    with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                # converting the numbers from string to int
+                sudoku_puzzle.append([int(n) if n != '' else 0 for n in row])
+    return sudoku_puzzle
+
+def write_sudoku_csv(sudoku_grid:list, file_path:str)->None:
+    """
+    Writes a sudoku grid to a specified CSV file.
+
+    sudoku_grid (list) a 2d list of integers representing the sudoku grid.
+
+    file_path (str) a path to the file you want to write to
+
+    return: None
+    """
+    with open(file_path, 'x') as file:
+        spamwriter = csv.writer(file)
+        for row in sudoku_grid:
+            spamwriter.writerow(['' if cell == 0 else str(cell) for cell in row])
+        
 
 def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["PURPLE"], grid_color:str=ANSI_CODE["LIGHT_BLUE"]) -> None:
     """
@@ -75,6 +108,7 @@ def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["PURPLE"], grid_col
 # ╚═╩═╩═╩═╩═╩═╩═╩═╩═╝
 # ┏━┳━┳━╥━┳━┳━╥━┳━┳━┓
 #    """
+
 def show_help():
     help_text = """
 📘 SUDOKU GAME HELP
@@ -116,7 +150,7 @@ def double_check(sudoku_grid:list) -> None:
     """
     edited_cells = set()
     while True:
-        print_board(format_grid(grid, edited_cells))  # your own colorful function
+        print_board(format_grid(sudoku_grid, edited_cells))  # your own colorful function
         print('Please recheck your sudoku board:')
         print('- help')
         print('- ok')
@@ -148,7 +182,7 @@ def double_check(sudoku_grid:list) -> None:
 
 # Track edited (user-modified) cells
 
-def format_grid(sudoku_grid:list, highlighted_cells:set):
+def format_grid(sudoku_grid:list, highlighted_cells:set=set()) -> list:
     """
     replaces the 2d grid from integers to string, with coloring and removing 0s
 
@@ -158,6 +192,8 @@ def format_grid(sudoku_grid:list, highlighted_cells:set):
     It's used to track which cells the user has modified by using the replace x y n command in your Sudoku game.
     Because you want the numbers that the user replaces to show up in blue — so 
     we need a way to remember which cells were changed.
+
+    return: 2d list of string representing a sudoku grid 
     """
     # edited_cells: Keeps track of (y, x) coordinates of any cells you replace.
     
@@ -174,11 +210,20 @@ def format_grid(sudoku_grid:list, highlighted_cells:set):
         updated.append(updated_row)
     return updated
 
+def get_non_empty_coord(sudoku_grid:list) -> set:
+    """
+    returns a set of coordinates (y, x) where the element is non-zero
 
+    sudoku_grid (list): a 2d list of number representing a sudoku board 
+    return: set of tuple 
+    """
+    non_empty_coord = set()
+    for y, row in enumerate(sudoku_grid):
+        for x, cell in enumerate(row):
+            if cell != 0:
+                non_empty_coord.add((y, x))
+    return non_empty_coord
 
-        # user_input == "replace x y n".split()
-        # grid[y][x] = n
-        # print(sudoku_grid)
 if __name__ == "__main__":
     grid = [[5, 3, 4, 6, 7, 8, 1, 9, 2],
             [6, 7, 2, 1, 9, 5, 4, 3, 8],
@@ -190,3 +235,4 @@ if __name__ == "__main__":
             [2, 8, 7, 4, 1, 9, 3, 6, 5],
             [3, 4, 5, 2, 8, 6, 7, 1, 9]]
     double_check(grid)
+    write_sudoku_csv(grid, "./output/sudoku_output.csv")

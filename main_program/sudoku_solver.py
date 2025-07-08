@@ -1,26 +1,9 @@
-import csv
 import numpy as np
 import copy
 import sudoku_utils
 import time
 import os
 import threading
-
-def read_sudoku_csv(file_path:str)->list:
-    """
-    reads a sudoku puzzle stored as a CSV file
-
-    file_path (str): path to the csv file
-
-    return: 2d list representing a sudoku grid
-    """
-    sudoku_puzzle = []
-    with open(file_path, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                # converting the numbers from string to int
-                sudoku_puzzle.append([int(n) if n != '' else 0 for n in row])
-    return sudoku_puzzle
     
 
 def is_possible(sudoku_puzzle:list, x:int, y:int, n:int)->bool:
@@ -53,7 +36,7 @@ def is_possible(sudoku_puzzle:list, x:int, y:int, n:int)->bool:
     
     return fits_rows and fits_columns and fits_squares
 
-def solve_sudoku(sudoku_puzzle:list, solutions_list:list, delay:float=0) -> None:
+def solve_sudoku(sudoku_puzzle:list, solutions_list:list) -> None:
     """
     solves the sudoku puzzle and returns the list of all possible solutions
 
@@ -74,8 +57,7 @@ def solve_sudoku(sudoku_puzzle:list, solutions_list:list, delay:float=0) -> None
                 if not is_possible(sudoku_puzzle, x, y, n):
                     continue 
                 sudoku_puzzle[y][x] = n
-                time.sleep(delay)
-                solve_sudoku(sudoku_puzzle, solutions_list, delay)
+                solve_sudoku(sudoku_puzzle, solutions_list)
                 # but now we've traveled crossed dimensions and came back here
                 # but now we know... and so, backtracking...
                 sudoku_puzzle[y][x] = 0
@@ -135,30 +117,24 @@ def solve_sudoku_animated(sudoku_puzzle:list, delay:float=1/60) -> None:
     """
     Wrapper function.
     """
-
-    def print_board_occasionally(sudoku_puzzle:list, delay:float):
-        while True:
+    event = threading.Event()
+    def print_board_occasionally(sudoku_puzzle:list, delay:float, event):
+        while not event.is_set():
             time.sleep(delay)
             os.system("clear")
             sudoku_utils.print_board(sudoku_puzzle)
-    printing_thread = threading.Thread(target=print_board_occasionally, args=(sudoku_puzzle, delay), daemon=True)
+    printing_thread = threading.Thread(target=print_board_occasionally, args=(sudoku_puzzle, delay, event))
     printing_thread.start()
     solve_sudoku_single_solution(sudoku_puzzle, delay=delay/10)
-    
+    event.set()
 
 if __name__ == "__main__":
-    puzzle = read_sudoku_csv("./sudoku_puzzle.csv")
+    puzzle = sudoku_utils.read_sudoku_csv("./sudoku_puzzle.csv")
     
     # want to duplicate it such that we have one puzzle, and one solution.
     solved_sudoku = copy.deepcopy(puzzle)
 
     solve_sudoku_animated(solved_sudoku)    
 
-    time.sleep(1)
     sudoku_utils.print_board(solved_sudoku)
-    # print("Puzzle: ")
-    # print(np.matrix(puzzle))
 
-    # print("Solution: ")
-    # print([np.matrix(sol) for sol in solved_sudoku])
-    

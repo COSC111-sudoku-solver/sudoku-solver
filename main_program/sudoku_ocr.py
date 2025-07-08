@@ -60,7 +60,7 @@ def crop_image(uncropped_img:np.ndarray)->np.ndarray:
         raise Exception("Please retake the picture. Can't find external borders. ")      
                 
 
-def get_cells(sudoku_img:np.ndarray)->list:
+def split_grid(sudoku_img:np.ndarray)->list:
     """
     Given an image of a sudoku puzzle, this function will split the image into 81 images of its cells. 
 
@@ -154,10 +154,11 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
 
     def str_to_int(text):
         # print(text)
-        if text != '':
-            return int(text)
-        else:
+        if text == '':
             return 0
+        else:
+            # in case it detects a number as 2 digit numbers
+            return int(text[0])
     
     grid_of_num = grid_of_img.copy()
     
@@ -167,6 +168,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
             # cv2.imshow(f"{x}, {y}", grid_of_img[y][x])
             # cv2.waitKey(0)       
             if cv2.countNonZero(img:=grid_of_img[y][x]) == 0:
+                # if the image is all white (blank), don't feed it into OCR 
                 grid_of_img[y][x] = 0
             else:
                 inverted_img = cv2.bitwise_not(img)
@@ -185,8 +187,7 @@ if __name__ == "__main__":
     sudoku_img = crop_image(sudoku_img)    
     print("Splitting cells...")
     # list of cells as a 2d list
-    list_of_cells = get_cells(sudoku_img)
+    list_of_cells = split_grid(sudoku_img)
     print("Using OCR...")
     # print(list_of_cells)
-    print(sudoku_utils.print_board(image_to_num_grid(list_of_cells, "/usr/bin/tesseract")))
-    cv2.destroyAllWindows()
+    sudoku_utils.print_board(image_to_num_grid(list_of_cells))
