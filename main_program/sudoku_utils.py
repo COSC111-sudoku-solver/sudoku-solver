@@ -1,35 +1,34 @@
 from functools import reduce
 
-# Track edited (user-modified) cells
-# edited_cells: Keeps track of (y, x) coordinates of any cells you replace.
-"""
-It's used to track which cells the user has modified by using the replace x y n command in your Sudoku game.
-Because you want the numbers that the user replaces to show up in blue — so 
-we need a way to remember which cells were changed.
+ANSI_CODE = {
+    "BLACK" : "\033[0;30m",
+    "RED" : "\033[0;31m",
+    "GREEN" : "\033[0;32m",
+    "BROWN" : "\033[0;33m",
+    "BLUE" : "\033[0;34m",
+    "PURPLE" : "\033[0;35m",
+    "CYAN" : "\033[0;36m",
+    "LIGHT_GRAY" : "\033[0;37m",
+    "DARK_GRAY" : "\033[1;30m",
+    "LIGHT_RED" : "\033[1;31m",
+    "LIGHT_GREEN" : "\033[1;32m",
+    "YELLOW" : "\033[1;33m",
+    "LIGHT_BLUE" : "\033[1;34m",
+    "LIGHT_PURPLE" : "\033[1;35m",
+    "LIGHT_CYAN" : "\033[1;36m",
+    "LIGHT_WHITE" : "\033[1;37m",
+    "BOLD" : "\033[1m",
+    "FAINT" : "\033[2m",
+    "ITALIC" : "\033[3m",
+    "UNDERLINE" : "\033[4m",
+    "BLINK" : "\033[5m",
+    "NEGATIVE" : "\033[7m",
+    "CROSSED" : "\033[9m",
+    "END" : "\033[0m"
+}
 
-"""
-edited_cells = set()
 
-# Color a text in blue for display
-def make_text_blue(text):
-    return f"\033[0;34m{text}\033[0m"
-
-# Replace text with blue version if it's edited
-def apply_blue_to_edited(sudoku_grid):
-    # updated= [] initializes an empty list that will store the processed Sudoku rows.
-    updated = []
-    for y, row in enumerate(sudoku_grid):
-        #Loops over each row (row) of the Sudoku grid, and y is the row index (0-based).
-        updated_row = []
-        for x, val in enumerate(row):
-            if (y, x) in edited_cells:
-                updated_row.append(make_text_blue(' ' if val == 0 else val))
-            else:
-                updated_row.append(' ' if val == 0 else val)
-        updated.append(updated_row)
-    return updated
-
-def print_board(sudoku_grid:list) -> None:
+def print_board(sudoku_grid:list, border_color:str=ANSI_CODE["RED"], grid_color:str=ANSI_CODE["CYAN"]) -> None:
     """
     Simply prints the board with a given a sudoku grid.
 
@@ -39,10 +38,10 @@ def print_board(sudoku_grid:list) -> None:
 
     col_index = "  " + reduce(lambda a, b: a + b, [f"\033[0;{31+(i%5)}m{i}   " for i in range(9)]) + "\n"
 
-    top = "\033[0;31m╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗\033[0m\n"
-    middle_normal = "\033[0;31m╟\033[0;32m━━━┿━━━┿━━━\033[0;31m╫\033[0;32m━━━┿━━━┿━━━\033[0;31m╫\033[0;32m━━━┿━━━┿━━━\033[0;31m╢\033[0m\n"
-    middle_bold = "\033[0;31m╠═══╪═══╪═══╫═══╪═══╪═══╫═══╪═══╪═══╣\033[0m\n"
-    bottom = "\033[0;31m╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝\033[0m\n"
+    top = f"{border_color}╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗\033[0m\n"
+    middle_normal = f"{border_color}╟{grid_color}━━━┿━━━┿━━━{border_color}╫{grid_color}━━━┿━━━┿━━━{border_color}╫{grid_color}━━━┿━━━┿━━━{border_color}╢\033[0m\n"
+    middle_bold = f"{border_color}╠═══╪═══╪═══╫═══╪═══╪═══╫═══╪═══╪═══╣\033[0m\n"
+    bottom = f"{border_color}╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝\033[0m\n"
 
     # i sure do hope these are only pointers... otherwise rip memory (altho modern computers OP)
     x_grid_list = [
@@ -58,8 +57,8 @@ def print_board(sudoku_grid:list) -> None:
     ]
     grid = col_index + top
     for i, rows in enumerate(sudoku_grid):
-        grid += "\033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0;32m {} ┃ {} ┃ {} \033[0;31m║\033[0m \033[0;{}m{}\n".format(
-        *[f"\033[0m{' ' if cell == 0 else (make_text_blue(cell) if (i, j) in edited_cells else cell)}\033[0;32m" for j, cell in enumerate(rows)],
+        grid += (f"{border_color}║{grid_color}"+(" {} "+f"{grid_color}┃\033[0m" + " {} " + f"{grid_color}┃\033[0m"+" {} " + f"{border_color}║{grid_color}")*3 + "\033[0;{}m{}\n").format(
+        *rows,
         31+(i%5), i) + x_grid_list[i]
 
     print(grid)
@@ -103,16 +102,21 @@ Type 'help' to see this message again.
 """
     print(help_text)
 
-def double_check(sudoku_grid:list):
+# Color a text in a certain color for display
+def color_text(text, color="\033[0;34m") -> str:
+    return f"{color}{text}\033[0m"
+
+def double_check(sudoku_grid:list) -> None:
     """
     asks the user to enter a command.
     command list:
     - help: print the command list, give more info
     - ok: exit out of the function
     - replace x y n: replace the number in that given cell
-    """    
+    """
+    edited_cells = set()
     while True:
-        print_board(grid)  # your own colorful function
+        print_board(format_grid(grid, edited_cells))  # your own colorful function
         print('Please recheck your sudoku board:')
         print('- help')
         print('- ok')
@@ -142,6 +146,32 @@ def double_check(sudoku_grid:list):
             print("❌ Unknown command. Type 'help'")
 
 
+# Track edited (user-modified) cells
+
+# Replace text with blue version if it's edited
+def format_grid(sudoku_grid, edited_cells:set):
+    """
+    It's used to track which cells the user has modified by using the replace x y n command in your Sudoku game.
+    Because you want the numbers that the user replaces to show up in blue — so 
+    we need a way to remember which cells were changed.
+    """
+    # edited_cells: Keeps track of (y, x) coordinates of any cells you replace.
+    
+    # updated= [] initializes an empty list that will store the processed Sudoku rows.
+    updated = []
+    for y, row in enumerate(sudoku_grid):
+        #Loops over each row (row) of the Sudoku grid, and y is the row index (0-based).
+        updated_row = []
+        for x, val in enumerate(row):
+            if (y, x) in edited_cells:
+                updated_row.append(color_text(' ' if val == 0 else val))
+            else:
+                updated_row.append(color_text(' ' if val == 0 else val, ANSI_CODE["GREEN"]))
+        updated.append(updated_row)
+    return updated
+
+
+
         # user_input == "replace x y n".split()
         # grid[y][x] = n
         # print(sudoku_grid)
@@ -156,3 +186,4 @@ if __name__ == "__main__":
             [2, 8, 7, 4, 1, 9, 3, 6, 5],
             [3, 4, 5, 2, 8, 6, 7, 1, 9]]
     double_check(grid)
+    print_board(format_grid(grid, {(3, 2)}))
