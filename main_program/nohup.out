@@ -1,6 +1,0 @@
-[0.137] Failed to enable transparency. This happens when your desktop environment does not support compositing.
-[0.393] [glfw error 65544]: Notify: Failed to get server capabilities error: org.freedesktop.DBus.Error.NoReply: Did not receive a reply. Possible causes include: the remote application did not send a reply, the message bus security policy blocked the reply, the reply timeout expired, or the network connection was broken.
-[0.393] [glfw error 65544]: process_desktop_settings: failed with error: org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable
-[0.137] Failed to enable transparency. This happens when your desktop environment does not support compositing.
-[0.362] [glfw error 65544]: Notify: Failed to get server capabilities error: org.freedesktop.DBus.Error.NoReply: Did not receive a reply. Possible causes include: the remote application did not send a reply, the message bus security policy blocked the reply, the reply timeout expired, or the network connection was broken.
-[0.362] [glfw error 65544]: process_desktop_settings: failed with error: org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable
