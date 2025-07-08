@@ -223,16 +223,3 @@ def get_non_empty_coord(sudoku_grid:list) -> set:
             if cell != 0:
                 non_empty_coord.add((y, x))
     return non_empty_coord
-
-if __name__ == "__main__":
-    grid = [[5, 3, 4, 6, 7, 8, 1, 9, 2],
-            [6, 7, 2, 1, 9, 5, 4, 3, 8],
-            [1, 9, 8, 3, 4, 2, 6, 5, 7],
-            [8, 1, 9, 7, 6, 4, 5, 2, 3],
-            [4, 2, 6, 8, 5, 3, 9, 7, 1],
-            [7, 5, 3, 9, 2, 1, 8, 4, 6],
-            [9, 6, 1, 5, 3, 7, 2, 8, 4],
-            [2, 8, 7, 4, 1, 9, 3, 6, 5],
-            [3, 4, 5, 2, 8, 6, 7, 1, 9]]
-    double_check(grid)
-    write_sudoku_csv(grid, "./output/sudoku_output.csv")

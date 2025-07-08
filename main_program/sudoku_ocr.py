@@ -178,16 +178,3 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
                 grid_of_num[y][x] = str_to_int(text.strip())        
 
     return grid_of_num
-    
-    
-if __name__ == "__main__":
-    print("Loading image...")
-    sudoku_img = load_and_prepare_image("./images/sudoku_faint_borders.png")
-    print("Cropping image...")
-    sudoku_img = crop_image(sudoku_img)    
-    print("Splitting cells...")
-    # list of cells as a 2d list
-    list_of_cells = split_grid(sudoku_img)
-    print("Using OCR...")
-    # print(list_of_cells)
-    sudoku_utils.print_board(image_to_num_grid(list_of_cells))

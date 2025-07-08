@@ -127,14 +127,3 @@ def solve_sudoku_animated(sudoku_puzzle:list, delay:float=1/60) -> None:
     printing_thread.start()
     solve_sudoku_single_solution(sudoku_puzzle, delay=delay/10)
     event.set()
-
-if __name__ == "__main__":
-    puzzle = sudoku_utils.read_sudoku_csv("./sudoku_puzzle.csv")
-    
-    # want to duplicate it such that we have one puzzle, and one solution.
-    solved_sudoku = copy.deepcopy(puzzle)
-
-    solve_sudoku_animated(solved_sudoku)    
-
-    sudoku_utils.print_board(solved_sudoku)
-
