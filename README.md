@@ -57,7 +57,7 @@ or generally:
 Setup the environmental variable called `TESSDATA_PREFIX` in `~/.bashrc`
 
 ```bash
-export TESSDATA_PREFIX=/path/to/tessdata >> ~/.bashrc
+echo "export TESSDATA_PREFIX=/path/to/tessdata" >> ~/.bashrc
 ```
 
 Source the `~/.bashrc` file
@@ -92,20 +92,19 @@ cd $TESSDATA_PREFIX
 
 Check that `eng.traineddata ` is in the directory using the `ls` command.
 
-If it isn't in the directory, download the file and move it to the `$TESSDATA_PREFIX` directory.
+If it isn't in the directory, download the file from [here](https://github.com/tesseract-ocr/tessdata) and move it to the `$TESSDATA_PREFIX` directory.
 
 
 ## Using it as a CLI program
 
-**Note**: The computer vision algorithm to detect and process the sudoku grid isn't very sophisticated. In short this is the algorithm:
+**Note**: The computer vision algorithm used to detect and process the sudoku grid isn't very sophisticated. In short, this is the algorithm:
 
 1. load the image
 2. crop the image by detecting external borders (no perspective transform)
 3. split the cells by detecting contours of the cell in the grid (very error prone)
 4. feed the cells one by one into an `tesseract-ocr` (very slow)
 
-As such, it's best not to use it on sudoku puzzles taken through a camera.
-Furthermore, from testing, these sudoku sites work best with the program (from best to worst):
+As such, it's best not to use it on sudoku puzzles images taken through a camera. From testing, these sudoku sites work best with the program (from best to worst):
 
 1. [websudoku](https://www.websudoku.com/)
 2. [printable sudoku](https://sudoku.com/sudoku-printable)
@@ -113,7 +112,7 @@ Furthermore, from testing, these sudoku sites work best with the program (from b
 4. [nytimes sodoku](https://www.nytimes.com/puzzles/sudoku/hard)
 5. [sudoku.com](https://sudoku.com/)
 
-And from testing, it seems like it's best if the image's resolution is not too high while not too low either.
+And from testing, it seems like it's best if the image's resolution is not too high while not being too low either.
 
 First take a screenshot of a sudoku board from an online website as such:
 
@@ -132,7 +131,7 @@ I've stored it in `web_sudoku.png` in my current working directory and my path t
 Therefore, I'll run:
 
 ```bash
-python3 -m sudoku_solver_ocr .web_sudoku.png /sbin/tesseract
+python3 -m sudoku_solver_ocr ./web_sudoku.png /sbin/tesseract
 ```
 
 If no error arises, a sudoku board should appear in your screen.
@@ -212,7 +211,7 @@ If all goes well, we should be greeted with a solved sudoku board.
 Save solution as CSV file?(y/n) 
 ```
 
-We can save the solution as a `.csv` file. For instance if I want to save it in `sudoku_solution.csv`:
+We can save the solution as a `.csv` file. For instance, if I want to save it in `sudoku_solution.csv`:
 
 ```
 Save solution as CSV file?(y/n) y
@@ -274,7 +273,7 @@ This file provides tools used to convert sudoku images to plain text.
 |function|details|
 |---|---|
 |`load_and_prepare_image`|loads the sudoku image, grayscale the image and also binarize it|
-|`crop_image`|simply detects an external border of the sudoku grid and crops it. splits out the cropped image|
+|`crop_image`|simply detects an external border of the sudoku grid and crops it. Splits out the cropped image|
 |`split_grid`|splits the sudoku grid image to 81 images representing cells that either contain a number or nothing. This is all then stored in a 2d list.|
 |`image_to_num_grid`|does OCR on the output of `split_grid` which is a 2d list of images. The path to the `tesseract` is also an argument here|
 
