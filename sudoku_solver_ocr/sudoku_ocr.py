@@ -1,7 +1,7 @@
 import cv2
 import pytesseract
 import numpy as np
-import sudoku_utils
+from . import sudoku_utils
 
 def load_and_prepare_image(path_to_image:str)->np.ndarray:
     """
@@ -39,13 +39,7 @@ def crop_image(uncropped_img:np.ndarray)->np.ndarray:
     surrounding_contour, _ = cv2.findContours(uncropped_img,
                                 cv2.RETR_EXTERNAL,# only return the external contour
                                 cv2.CHAIN_APPROX_SIMPLE) # probably some algorithm to find contours
-#     surrounding_contour = max(possible_surrounding_contour, key=cv2.contourArea)
-#     
-#     # Get the 4 corners
-#     epsilon = 0.02 * cv2.arcLength(surrounding_contour, True)
-#     approx = cv2.approxPolyDP(surrounding_contour, epsilon, True)
-
-    
+                                    
     # surrounding contour should only be of length one
     # gets the bounding rectangle of the surrounding borders
     if len(surrounding_contour) == 1: 
@@ -104,7 +98,7 @@ def split_grid(sudoku_img:np.ndarray)->list:
             # then normalize it to 9x9 (floor it to fit)
             coordinates_of_centroid = (int(((y+(h/2))/sudoku_img_height)*9), 
                                         int(((x+(w/2))/sudoku_img_width)*9))
-            # print(coordinates_of_centroid, (y+ (h/2), x + (w/2)))
+
             # get the image cropped via contour
             y1 = max(0, y + int(0.075 * h))
             y2 = min(sudoku_img_height, y + int(0.925 * h))
@@ -113,23 +107,17 @@ def split_grid(sudoku_img:np.ndarray)->list:
             
             image_of_cell = sudoku_img[y1:y2, x1:x2]
             
-            
-            # image_of_cell = sudoku_img[y:y+h, x:x+w]
-            
             list_of_coord_and_cell.append((*coordinates_of_centroid, image_of_cell))
 
         
         # sort the list
         list_of_coord_and_cell.sort()
-        # print(len(list_of_coord_and_cell))
-        # for y_cord, x_cord, my_img in list_of_coord_and_cell:
-            # cv2.imshow(f"{x_cord}, {y_cord}", my_img) 
-            # cv2.waitKey(0)
+
         # remove the temporary coordinate of centroid used for sorting
         list_of_sorted_cells = [cell[2] for cell in list_of_coord_and_cell]
-        # print(list_of_sorted_cells)
+
         # turn the list into a 2d list which contains 9 list of 9 elements and zreturns it
-        # return np.array(list_of_sorted_cells, dtype=object).reshape((9, 9)).tolist()
+
         return [list_of_sorted_cells[i * 9:(i + 1) * 9] for i in range(9)]
         
     else:
@@ -165,8 +153,7 @@ def image_to_num_grid(grid_of_img:list, path_to_pytesseract:str="/sbin/tesseract
     for y in range(9):
         for x in range(9):        
             # inverting the image back to white background
-            # cv2.imshow(f"{x}, {y}", grid_of_img[y][x])
-            # cv2.waitKey(0)       
+
             if cv2.countNonZero(img:=grid_of_img[y][x]) == 0:
                 # if the image is all white (blank), don't feed it into OCR 
                 grid_of_img[y][x] = 0

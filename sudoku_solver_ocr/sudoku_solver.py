@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-import sudoku_utils
+from . import sudoku_utils
 import time
 import os
 import threading

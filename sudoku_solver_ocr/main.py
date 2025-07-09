@@ -1,15 +1,15 @@
-import sudoku_solver as ss
-import sudoku_utils as su
-import sudoku_ocr as so
 import sys
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        sys.exit(f"""Please input an {su.color_text('image path', su.ANSI_CODE['YELLOW'])} and the path to {su.color_text('tesseract', su.ANSI_CODE['YELLOW'])}
-To check where tesseract program is located, type {su.color_text('which tesseract', su.ANSI_CODE['YELLOW'])}
-{su.color_text('Example syntax:', su.ANSI_CODE['CYAN'])} python main.py ./path/to/image.png /path/to/tesseract
-        """)
+from . import sudoku_solver as ss
+from . import sudoku_utils as su
+from . import sudoku_ocr as so
 
+def main():
+    if len(sys.argv) != 3:
+            sys.exit(f"""Please input an {su.color_text('image path', su.ANSI_CODE['YELLOW'])} and the path to {su.color_text('tesseract', su.ANSI_CODE['YELLOW'])}
+    To check where tesseract program is located, type {su.color_text('which tesseract', su.ANSI_CODE['YELLOW'])}
+    {su.color_text('Example syntax:', su.ANSI_CODE['CYAN'])} python main.py ./path/to/image.png /path/to/tesseract
+            """)
     print("Loading image...")
     sudoku_img = so.load_and_prepare_image(sys.argv[1])
     print("Cropping image...")
@@ -24,7 +24,7 @@ To check where tesseract program is located, type {su.color_text('which tesserac
     su.double_check(sudoku_grid)
 
     is_animated = ""
-    while (is_animated:=input("animate?(y/n) ").lower()) not in {'y', 'n'}:
+    while (is_animated:=input("Animate?(y/n) ").lower()) not in {'y', 'n'}:
         pass
 
     # get the coordinates of the cells that are already given
@@ -32,7 +32,7 @@ To check where tesseract program is located, type {su.color_text('which tesserac
 
     # for collecting the solutions
     solutions_list = []
-    
+
     if is_animated == 'y':
         ss.solve_sudoku_animated(sudoku_grid)
         # the animated algorithm only returns on solution, in the case of possible multiple solutions (the nearest solution)
@@ -43,9 +43,9 @@ To check where tesseract program is located, type {su.color_text('which tesserac
     # in case of multiple solutions
     for solutions in solutions_list:
         su.print_board(su.format_grid(solutions, given_cells))
-    
+
     is_saved = ""
-    while (is_saved:=input("save solution as CSV file?(y/n) ").lower()) not in {'y', 'n'}:
+    while (is_saved:=input("Save solution as CSV file?(y/n) ").lower()) not in {'y', 'n'}:
         pass
 
     if is_saved == "n":
@@ -69,4 +69,6 @@ To check where tesseract program is located, type {su.color_text('which tesserac
             
             else:
                 break
-                
+            
+if __name__ == "__main__":
+    main()
